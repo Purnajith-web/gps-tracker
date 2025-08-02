@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GPS Tracker</title>
+  <title>GPS to Google Sheets Tracker</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * {
@@ -175,31 +175,89 @@
       color: #dc3545;
     }
     
-    .instructions {
+    .debug {
+      background: rgba(30, 30, 60, 0.7);
+      border-radius: 15px;
+      padding: 15px;
+      margin-top: 20px;
+      text-align: left;
+      font-size: 0.9rem;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    
+    .debug h3 {
+      color: #ff8a00;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+    
+    .debug-content {
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #ddd;
+    }
+    
+    .btn {
+      background: linear-gradient(to right, #ff8a00, #da1b60);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(218, 27, 96, 0.4);
+      margin-top: 15px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 7px 20px rgba(218, 27, 96, 0.6);
+    }
+    
+    .btn:active {
+      transform: translateY(1px);
+    }
+    
+    .github-instructions {
       background: rgba(30, 30, 60, 0.7);
       border-radius: 15px;
       padding: 20px;
       margin-top: 20px;
       text-align: left;
-      display: none;
     }
     
-    .instructions h3 {
+    .github-instructions h3 {
       color: #ff8a00;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+    }
+    
+    .github-instructions ol {
+      padding-left: 20px;
       margin-bottom: 10px;
     }
     
-    .instructions ol {
-      padding-left: 20px;
-      margin-bottom: 15px;
-    }
-    
-    .instructions li {
+    .github-instructions li {
       margin-bottom: 8px;
       line-height: 1.5;
     }
     
-    .toggle-instructions {
+    .github-instructions code {
+      background: rgba(0,0,0,0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    
+    .toggle-btn {
       background: rgba(80, 80, 120, 0.5);
       border: none;
       color: #ff8a00;
@@ -233,7 +291,7 @@
         </div>
         <div class="status-content">
           <h3>Google Sheets</h3>
-          <p id="sheetsStatus">Connected to your spreadsheet</p>
+          <p id="sheetsStatus">Using URL: AKfycbxjGtlhDGKEGq5_6hG1eIuWOYAYbOGlYpEpBpxeFUk</p>
         </div>
       </div>
     </div>
@@ -248,53 +306,86 @@
         <h3>Longitude</h3>
         <p id="longitude">-</p>
       </div>
+      
+      <div class="data-box">
+        <h3>Accuracy</h3>
+        <p id="accuracy">-</p>
+      </div>
     </div>
     
-    <div class="footer">
-      <p>Your location data is being securely sent to Google Sheets</p>
-      <p>User ID: <span id="userId"></span></p>
+    <div class="debug">
+      <h3><i class="fas fa-bug"></i> Debug Console</h3>
+      <div class="debug-content" id="debug"></div>
     </div>
     
-    <button class="toggle-instructions" id="toggleBtn">
-      <i class="fas fa-info-circle"></i> GitHub Setup Instructions
+    <button class="btn" id="sendBtn">
+      <i class="fas fa-paper-plane"></i> Send Location Manually
     </button>
     
-    <div class="instructions" id="instructions">
+    <div class="footer">
+      <p>User ID: <span id="userId"></span></p>
+      <p>Data is sent to your Google Sheet</p>
+    </div>
+    
+    <button class="toggle-btn" id="githubBtn">
+      <i class="fab fa-github"></i> GitHub Setup Instructions
+    </button>
+    
+    <div class="github-instructions" id="githubInstructions" style="display: none;">
       <h3>How to Host on GitHub Pages:</h3>
       <ol>
         <li>Create a new GitHub repository named "gps-tracker"</li>
-        <li>Upload this HTML file to the repository (name it <code>index.html</code>)</li>
-        <li>Go to repository Settings > Pages</li>
+        <li>Create a file named <code>index.html</code></li>
+        <li>Copy this entire code and paste it into that file</li>
+        <li>Commit the file to your repository</li>
+        <li>Go to Settings > Pages</li>
         <li>Set source to "Deploy from a branch"</li>
         <li>Select branch: <code>main</code> or <code>master</code></li>
         <li>Select folder: <code>/(root)</code></li>
         <li>Click Save - your site will be at:<br>
             <code>https://yourusername.github.io/gps-tracker/</code></li>
       </ol>
-      <p><strong>Note:</strong> Make sure your Google Sheet is set up to receive data:</p>
-      <ol>
-        <li>Open your Google Sheet: <code>1TFKdPbSlNWIqSnlja1PRSXaiBZ-vIG85j6XtwRntEbM</code></li>
-        <li>Create columns: Timestamp, Latitude, Longitude, Accuracy, Device, User ID</li>
-        <li>Deploy the script as a web app with permissions set to "Anyone, even anonymous"</li>
-      </ol>
+      <p><strong>Note:</strong> Your Google Sheet is connected via the provided URL</p>
     </div>
   </div>
 
   <script>
-    // Google Sheets web app URL
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxDcNHWBtvKgBQ1UQl9ghOHlzDqPW-Qvboi2-5Ic_d3XbzoPem7ti4v98L9QodhVfz7/exec";
+    // Updated Google Sheets web app URL
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxjGtlhDGKEGq5_6hG1eIuWOYAYbOGlYpEpBpxeFUk/dev";
     
     const device = navigator.userAgent;
     const userId = "user_" + Math.floor(Math.random() * 10000);
     let watchId = null;
+    let lastPosition = null;
+    
+    // Debug logging
+    function debugLog(message) {
+      const debugElement = document.getElementById('debug');
+      debugElement.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+      debugElement.scrollTop = debugElement.scrollHeight;
+    }
     
     document.addEventListener('DOMContentLoaded', () => {
       // Display user ID
       document.getElementById('userId').textContent = userId;
+      debugLog(`User ID generated: ${userId}`);
+      debugLog(`Device: ${device.substring(0, 50)}...`);
+      debugLog(`Using Google Sheets URL: ${WEB_APP_URL}`);
       
-      // Toggle instructions
-      document.getElementById('toggleBtn').addEventListener('click', () => {
-        const instructions = document.getElementById('instructions');
+      // Add manual send button listener
+      document.getElementById('sendBtn').addEventListener('click', () => {
+        if (lastPosition) {
+          debugLog("Manual send requested");
+          sendToGoogleSheets(lastPosition);
+        } else {
+          debugLog("No location available to send");
+          updateStatus("No location available", "error");
+        }
+      });
+      
+      // GitHub instructions toggle
+      document.getElementById('githubBtn').addEventListener('click', () => {
+        const instructions = document.getElementById('githubInstructions');
         instructions.style.display = instructions.style.display === 'block' ? 'none' : 'block';
       });
       
@@ -305,12 +396,14 @@
     function requestLocation() {
       if ("geolocation" in navigator) {
         updateStatus("Getting your location...");
+        debugLog("Requesting location access...");
         
         // Watch for position updates
         watchId = navigator.geolocation.watchPosition(
           position => {
             // Update UI
             updatePositionUI(position);
+            lastPosition = position;
             
             // Send to Google Sheets
             sendToGoogleSheets(position);
@@ -323,17 +416,22 @@
           }
         );
       } else {
-        updateStatus("Geolocation is not supported by your browser", "error");
+        updateStatus("Geolocation not supported", "error");
+        debugLog("Geolocation not supported by browser");
       }
     }
     
     function updatePositionUI(position) {
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
+      const accuracy = position.coords.accuracy;
       
       document.getElementById('latitude').textContent = latitude.toFixed(6);
       document.getElementById('longitude').textContent = longitude.toFixed(6);
-      updateStatus("Location acquired - sending data...");
+      document.getElementById('accuracy').textContent = `${accuracy.toFixed(1)}m`;
+      
+      updateStatus("Location acquired");
+      debugLog(`Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)} (Accuracy: ${accuracy.toFixed(1)}m)`);
     }
     
     function sendToGoogleSheets(position) {
@@ -352,6 +450,8 @@
         accuracy: accuracy
       };
       
+      debugLog(`Sending to Google Sheets: ${JSON.stringify(data)}`);
+      
       // Send to Google Sheets
       fetch(WEB_APP_URL, {
         method: "POST",
@@ -360,11 +460,16 @@
           "Content-Type": "application/json"
         }
       })
-      .then(res => res.text())
       .then(response => {
+        debugLog(`Received response: ${response.status} ${response.statusText}`);
+        return response.text();
+      })
+      .then(responseText => {
+        debugLog(`Server response: ${responseText}`);
         updateStatus("Data sent to Google Sheets", "success");
       })
       .catch(err => {
+        debugLog(`Error: ${err.message}`);
         updateStatus(`Error: ${err.message}`, "error");
       });
     }
@@ -385,6 +490,8 @@
           errorMessage = "An unknown error occurred.";
           break;
       }
+      
+      debugLog(`Location error: ${errorMessage}`);
       updateStatus(errorMessage, "error");
     }
     
